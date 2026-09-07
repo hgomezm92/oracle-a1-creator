@@ -2,10 +2,14 @@ name: Schedule Test
 
 on:
   schedule:
-    - cron: "3,23,43 * * * *"
+    - cron: '*/5 * * * *'    # cada 5 minutos (UTC) — para pruebas
+  workflow_dispatch: {}      # permite ejecutar manualmente desde la UI
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - run: date -u
+      - run: |
+          echo "scheduled run"
+          date -u
+          echo "GITHUB_EVENT_NAME=$GITHUB_EVENT_NAME"
