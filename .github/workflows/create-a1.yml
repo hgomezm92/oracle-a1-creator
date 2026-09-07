@@ -1,0 +1,68 @@
+name: Oracle A1 Creator
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-a1:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install OCI CLI
+        run: |
+          python3 -m pip install oci-cli
+
+      - name: Configure OCI
+        env:
+          OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
+          OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
+          OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+          OCI_REGION: ${{ secrets.OCI_REGION }}
+          OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.oci
+
+          printf '%s\n' "$OCI_PRIVATE_KEY" > ~/.oci/oci_api_key.pem
+
+          chmod 600 ~/.oci/oci_api_key.pem
+
+          cat > ~/.oci/config <<EOF
+          [DEFAULT]
+          user=$OCI_USER_OCID
+          fingerprint=$OCI_FINGERPRINT
+          tenancy=$OCI_TENANCY_OCID
+          region=$OCI_REGION
+          key_file=$HOME/.oci/oci_api_key.pem
+          EOF
+
+      - name: Configure project environment
+        env:
+          OCI_COMPARTMENT_ID: ${{ secrets.OCI_COMPARTMENT_ID }}
+          OCI_SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
+          OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_ID }}
+          OCI_AVAILABILITY_DOMAIN: ${{ secrets.OCI_AVAILABILITY_DOMAIN }}
+          OCI_REGION: ${{ secrets.OCI_REGION }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          cat > .env <<EOF
+          OCI_COMPARTMENT_ID=$OCI_COMPARTMENT_ID
+          OCI_SUBNET_ID=$OCI_SUBNET_ID
+          OCI_IMAGE_ID=$OCI_IMAGE_ID
+          OCI_AVAILABILITY_DOMAIN=$OCI_AVAILABILITY_DOMAIN
+          OCI_REGION=$OCI_REGION
+          TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN
+          TELEGRAM_CHAT_ID=$TELEGRAM_CHAT_ID
+          EOF
+
+      - name: Make scripts executable
+        run: |
+          chmod +x scripts/create-a1.sh
+          chmod +x scripts/telegram.sh
+
+      - name: Run Oracle A1 Creator
+        run: |
+          ./scripts/create-a1.sh
