@@ -38,6 +38,8 @@ jobs:
           key_file=$HOME/.oci/oci_api_key.pem
           EOF
 
+          chmod 600 ~/.oci/config
+
       - name: Configure project environment
         env:
           OCI_COMPARTMENT_ID: ${{ secrets.OCI_COMPARTMENT_ID }}
