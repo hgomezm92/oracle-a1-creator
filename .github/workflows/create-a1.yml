@@ -75,3 +75,11 @@ jobs:
       - name: Run Oracle A1 Creator
         run: |
           ./scripts/create-a1.sh
+    
+      - name: Upload creator log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: creator-log-${{ github.run_number }}
+          path: logs/creator.log
+          if-no-files-found: ignore
